@@ -281,6 +281,10 @@ class FTMouseMotion extends FTObject implements FTMotion
 {
   private int mouse_event_type;
   private int mouse_x, mouse_y;
+  private int mouse_button;
+  
+  public static final int BUTTON_LEFT = 200;
+  public static final int BUTTON_RIGHT = 201;
   
   public FTMouseMotion()
   {
@@ -289,12 +293,20 @@ class FTMouseMotion extends FTObject implements FTMotion
     mouse_y=0;
   }
   
-  public FTMouseMotion(int a, int b, int c)
+  public FTMouseMotion(int a, int b, int c, int d)
   {
-    super("FTMouseMotion :" +a + " " + b + " " +c);
+    super("FTMouseMotion :" +a + " " + b + " " +c + " " + d);
     mouse_event_type=a;
     mouse_x=b;
     mouse_y=c;
+    if(d==LEFT)
+    {
+      mouse_button=BUTTON_LEFT;
+    }
+    else
+    {
+      mouse_button=BUTTON_RIGHT;
+    }
   }
   
   public int getMouseX()
@@ -315,6 +327,11 @@ class FTMouseMotion extends FTObject implements FTMotion
   public int getTypeMouseEvent()
   {
     return mouse_event_type;
+  }
+  
+  public int getTypeButton()
+  {
+    return mouse_button;
   }
 }
 
@@ -356,7 +373,7 @@ void mouseClicked()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_CLICKED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_CLICKED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -364,7 +381,7 @@ void mousePressed()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_PRESSED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_PRESSED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -372,7 +389,7 @@ void mouseReleased()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_RELEASED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_RELEASED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -380,7 +397,7 @@ void mouseMoved()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -388,7 +405,7 @@ void mouseDragged()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_DRAGGED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_DRAGGED,mouseX,mouseY,mouseButton));
   }
 }
 

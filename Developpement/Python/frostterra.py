@@ -59,6 +59,10 @@ class FTPaint(FTObject):
         self.canvas=canvas
         self.matrix_color=FTColor()
         
+    def draw_rect(self, pos_s):
+        i = self.canvas.create_rectangle(pos_s.x,pos_s.y,(pos_s.x+pos_s.w),(pos_s.y+pos_s.h), fill=self.matrix_color.getStrColor())
+        return FTGObject(pos_s,FTIQuaternion(),i)
+        
     def draw_oval(self,pos_s):
         i = self.canvas.create_oval(pos_s.x,pos_s.y,(pos_s.x+pos_s.w),(pos_s.y+pos_s.h), fill=self.matrix_color.getStrColor())
         return FTGObject(pos_s,FTIQuaternion(),i)
