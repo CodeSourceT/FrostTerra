@@ -32,7 +32,14 @@ class FTWindows extends FTObject
     super("FTWINDOWS " + name_w);
     m_sw = size_win;
     m_fmr = flags_mode_render;
-    size(size_win.w,size_win.h,flags_mode_render);
+    if(flags_mode_render == FTRender.N_2D_CONTEXT)
+    {
+      size(size_win.w,size_win.h);
+    }
+    else
+    {
+      size(size_win.w,size_win.h,flags_mode_render);
+    }
   }
   
   public FTRect getSize()
@@ -78,11 +85,13 @@ interface FTOnKeyBoardListener
 
 private FTEvent m_frostterra_event_manager;
 private boolean is_event_manager_set = false;
+private long millis_time_event_move = 0;
 
 void setEventManager(FTEvent ev)
 {
   m_frostterra_event_manager = ev;
   is_event_manager_set = true;
+  millis_time_event_move=millis();
 }
 
 class FTEvent extends FTObject
@@ -397,7 +406,11 @@ void mouseMoved()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY,mouseButton));
+    if((millis()-millis_time_event_move)>1000)
+    {
+      millis_time_event_move=millis();
+      m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY,mouseButton));
+    }
   }
 }
 
@@ -1805,6 +1818,15 @@ class FTRect extends FTObject
     h=e;
     p=f;
   }
+  
+  public boolean isInRect(FTRect r)
+  {
+    if(r.x > x && r.y > y && r.x < (x+w) && r.y < (y+h))
+    {
+      return true;
+    }
+    return false;
+   }
 }
 
 class FTColor extends FTObject

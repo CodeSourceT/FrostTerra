@@ -32,7 +32,14 @@ class FTWindows extends FTObject
     super("FTWINDOWS " + name_w);
     m_sw = size_win;
     m_fmr = flags_mode_render;
-    size(size_win.w,size_win.h,flags_mode_render);
+    if(flags_mode_render == FTRender.N_2D_CONTEXT)
+    {
+      size(size_win.w,size_win.h);
+    }
+    else
+    {
+      size(size_win.w,size_win.h,flags_mode_render);
+    }
   }
   
   public FTRect getSize()
@@ -78,11 +85,13 @@ interface FTOnKeyBoardListener
 
 private FTEvent m_frostterra_event_manager;
 private boolean is_event_manager_set = false;
+private long millis_time_event_move = 0;
 
 void setEventManager(FTEvent ev)
 {
   m_frostterra_event_manager = ev;
   is_event_manager_set = true;
+  millis_time_event_move=millis();
 }
 
 class FTEvent extends FTObject
@@ -281,6 +290,10 @@ class FTMouseMotion extends FTObject implements FTMotion
 {
   private int mouse_event_type;
   private int mouse_x, mouse_y;
+  private int mouse_button;
+  
+  public static final int BUTTON_LEFT = 200;
+  public static final int BUTTON_RIGHT = 201;
   
   public FTMouseMotion()
   {
@@ -289,12 +302,20 @@ class FTMouseMotion extends FTObject implements FTMotion
     mouse_y=0;
   }
   
-  public FTMouseMotion(int a, int b, int c)
+  public FTMouseMotion(int a, int b, int c, int d)
   {
-    super("FTMouseMotion :" +a + " " + b + " " +c);
+    super("FTMouseMotion :" +a + " " + b + " " +c + " " + d);
     mouse_event_type=a;
     mouse_x=b;
     mouse_y=c;
+    if(d==LEFT)
+    {
+      mouse_button=BUTTON_LEFT;
+    }
+    else
+    {
+      mouse_button=BUTTON_RIGHT;
+    }
   }
   
   public int getMouseX()
@@ -315,6 +336,11 @@ class FTMouseMotion extends FTObject implements FTMotion
   public int getTypeMouseEvent()
   {
     return mouse_event_type;
+  }
+  
+  public int getTypeButton()
+  {
+    return mouse_button;
   }
 }
 
@@ -356,7 +382,7 @@ void mouseClicked()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_CLICKED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_CLICKED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -364,7 +390,7 @@ void mousePressed()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_PRESSED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_PRESSED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -372,7 +398,7 @@ void mouseReleased()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_RELEASED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_RELEASED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -380,7 +406,11 @@ void mouseMoved()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY));
+    if((millis()-millis_time_event_move)>1000)
+    {
+      millis_time_event_move=millis();
+      m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_MOVED,mouseX,mouseY,mouseButton));
+    }
   }
 }
 
@@ -388,7 +418,7 @@ void mouseDragged()
 {
   if(is_event_manager_set)
   {
-    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_DRAGGED,mouseX,mouseY));
+    m_frostterra_event_manager.add_event(new FTMouseMotion(FTEvent.MOUSE_DRAGGED,mouseX,mouseY,mouseButton));
   }
 }
 
@@ -1788,6 +1818,15 @@ class FTRect extends FTObject
     h=e;
     p=f;
   }
+  
+  public boolean isInRect(FTRect r)
+  {
+    if(r.x > x && r.y > y && r.x < (x+w) && r.y < (y+h))
+    {
+      return true;
+    }
+    return false;
+   }
 }
 
 class FTColor extends FTObject
