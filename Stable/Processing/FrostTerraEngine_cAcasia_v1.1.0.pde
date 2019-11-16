@@ -7,6 +7,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import java.awt.Component;
+import java.awt.Container;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.*;
 import java.io.*;
 import java.util.Random;
 
@@ -67,9 +75,11 @@ class FTWindows extends FTObject
   }
 }
 
-class FTDialog extends JDialog
+abstract class FTDialog extends JDialog
 {
   private JPanel panel = new JPanel();
+  private boolean lock_surface = false;
+  
   public FTDialog(String title, FTRect pew)
   {
     this(title,pew,false);
@@ -86,8 +96,189 @@ class FTDialog extends JDialog
     this.setLocation(pew.x,pew.y);
     this.setSize(pew.w,pew.h);
     this.setResizable(resizable);
+    
+    panel.setLayout(null);
+    Container contentPane = getContentPane();
+    contentPane.add(panel);
     this.setVisible(visible);
-    this.add(panel);
+  }
+  
+  public void lockDrawPanel()
+  {
+    if(!lock_surface)
+    {
+    this.setVisible(false);
+    lock_surface=true;
+    }
+  }
+  
+  public void unlockDrawPanel()
+  {
+    if(lock_surface)
+    {
+    this.setVisible(true);
+    lock_surface=false;
+    }
+  }
+  
+  public void addObject(FTDialogObject obj)
+  {
+    Component c = obj.getComponent();
+    Dimension d = c.getPreferredSize();
+    //Insets insets = panel.getInsets();
+    FTRect pos = obj.getPosition();
+   // pos.x = pos.x + insets.left;
+    //pos.y = pos.y + insets.top;
+    c.setBounds(pos.x,pos.y,d.width,d.height);
+    lockDrawPanel();
+    panel.add(c);
+    unlockDrawPanel();
+  }
+}
+
+abstract class FTDialogObject extends FTObject
+{
+  private Component m_object;
+  private FTRect pos;
+  
+  public FTDialogObject(FTRect p)
+  {
+    super("FTDialogObject");
+    pos=p;
+  }
+  
+  public void setComponent(Component c)
+  {
+    m_object = c;
+  }
+  
+  public Component getComponent()
+  {
+    return m_object;
+  }
+  
+  public void setPosition(FTRect p)
+  {
+    pos=p;
+  }
+  
+  public FTRect getPosition()
+  {
+    return pos;
+  }
+}
+
+class FTDialogLabel extends FTDialogObject
+{
+  public FTDialogLabel(String label, FTRect pos)
+  {
+    super(pos);
+    this.setComponent(new JLabel(label));
+  }
+  
+  public String getText()
+  {
+    JLabel l = (JLabel)this.getComponent();
+    return l.getText();
+  }
+  
+  public void setText(String t)
+  {
+    JLabel l = (JLabel)this.getComponent();
+    l.setText(t);
+    Dimension d = l.getPreferredSize();
+    FTRect pos = this.getPosition();
+    l.setBounds(pos.x,pos.y,d.width,d.height);
+    this.setComponent(l);
+  }
+}
+
+interface FTDialogButtonClick
+{
+  public void onClick();
+}
+
+class FTDialogButton extends FTDialogObject implements ActionListener
+{
+  private FTDialogButtonClick m_callable=null;
+  
+  public FTDialogButton(String txt, FTRect pos)
+  {
+    super(pos);
+    JButton b = new JButton(txt);
+    b.addActionListener(this);
+    this.setComponent(b);
+  }
+  
+  public void setButtonListener(FTDialogButtonClick c)
+  {
+    m_callable=c;
+  }
+  
+  public String getText()
+  {
+    JButton l = (JButton)this.getComponent();
+    return l.getText();
+  }
+  
+  public void setText(String t)
+  {
+    JButton l = (JButton)this.getComponent();
+    l.setText(t);
+    Dimension d = l.getPreferredSize();
+    FTRect pos = this.getPosition();
+    l.setBounds(pos.x,pos.y,d.width,d.height);
+    this.setComponent(l);
+  }
+  
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    if(m_callable != null)
+    {
+      m_callable.onClick();
+    }
+  }
+}
+
+class FTDialogEditText extends FTDialogObject
+{
+  private boolean is_edit = true;
+  public FTDialogEditText(FTRect pos)
+  {
+    this("",pos);
+  }
+  
+  public FTDialogEditText(String pre_text, FTRect pos)
+  {
+    this(pre_text,pos,true);
+  }
+  
+  public FTDialogEditText(String pre_text, FTRect pos, boolean edit)
+  {
+    super(pos);
+    JTextField t = new JTextField(pre_text,pos.w);
+    t.setEditable(edit);
+    this.setComponent(t);
+    is_edit=edit;
+    this.setComponent(t);
+  }
+  
+  public void setEdit(boolean edit)
+  {
+    is_edit=edit;
+    JTextField t = (JTextField)this.getComponent();
+    t.setEditable(edit);
+  }
+  
+  public boolean getEdit()
+  {
+    return is_edit;
+  }
+  
+  public String getText()
+  {
+    JTextField t = (JTextField)this.getComponent();
+    return t.getText();
   }
 }
 
@@ -131,7 +322,7 @@ static class FTDialogBox
     fltp);
   }
   
-  public String getPathSaveFile()
+  public static String getPathSaveFile()
   {
     JFileChooser saveFile = new JFileChooser();
                 int result = saveFile.showSaveDialog(null);
@@ -142,7 +333,7 @@ static class FTDialogBox
     return "";
   }
   
-  public String getPathOpenFile()
+  public static String getPathOpenFile()
   {
     JFileChooser saveFile = new JFileChooser();
                 int result = saveFile.showOpenDialog(null);

@@ -3,6 +3,7 @@ FTImage img;
 FT3DObject obj;
 FTGui gui;
 FTEvent event;
+Dial d;
 
 void settings()
 {
@@ -30,6 +31,7 @@ r.fillMode(FTRender.NO_FILL);
 img = new FTImage("test.jpg", new FTRect(100,200,50), new FTIQuaternion(20,0,0));
 //obj = new FT3DObject("Low_Poly_Forest_tree01.obj", new FTRect(300,300,0), new FTIQuaternion(90,0,0));
 //obj.setSize(20);
+d = new Dial();
 }
 
 void draw()
@@ -50,6 +52,37 @@ class A implements FTOnClickListener
   public void onClick(int id)
   {
     println("Coucou !");
+    d.click();
+  }
+}
+
+class Dial extends FTDialog implements FTDialogButtonClick
+{
+  FTDialogLabel p;
+  FTDialogButton bt;
+  FTDialogEditText edt;
+  public Dial()
+  {
+    super("Title",new FTRect(200,200,640,480));
+    p=new FTDialogLabel("tom",new FTRect(320,240));
+    bt=new FTDialogButton("tom",new FTRect(0,0));
+    edt=new FTDialogEditText(new FTRect(10,240,10,0));
+    bt.setButtonListener(this);
+    this.lockDrawPanel();
+    this.addObject(p);
+    this.addObject(bt);
+    this.addObject(edt);
+    this.unlockDrawPanel();
+  }
+  
+  public void click()
+  {
+    p.setText("tom2");
+  }
+  
+  public void onClick(){
+    //p.setText(edt.getText());
+    FTDialogBox.getPathSaveFile();
   }
 }
 
